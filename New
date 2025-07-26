@@ -1,1 +1,285 @@
+-- Testol Hub | MM2
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
+function gradient(text, startColor, endColor)
+		local result = "";
+		local length = #text;
+		for i = 1, length do
+			local t = (i - 1) / math.max(length - 1, 1);
+			local r = math.floor((startColor.R + ((endColor.R - startColor.R) * t)) * 255);
+			local g = math.floor((startColor.G + ((endColor.G - startColor.G) * t)) * 255);
+			local b = math.floor((startColor.B + ((endColor.B - startColor.B) * t)) * 255);
+			local char = text:sub(i, i);
+			result = result .. '<font color=\"rgb(' .. r .. ", " .. g .. ", " .. b .. ')\">' .. char .. "</font>";
+		end
+		return result;
+	end
+
+    local Confirmed = false;
+	WindUI:Popup({Title=gradient("input ur shi here", Color3.fromHex("#f0e407"), Color3.fromHex("#16a9f2")),Icon="info",Content=(gradient("inout ur shi here", Color3.fromHex("#f0e407"), Color3.fromHex("#16a9f2")) .. gradient("", Color3.fromHex("#f0e407"), Color3.fromHex("#16a9f2"))),Buttons={{Title=gradient("Exit", Color3.fromHex("#f0e407"), Color3.fromHex("#f0e407")),Callback=function()
+	end,Variant="Tertiary"},{Title=gradient("Continue", Color3.fromHex("#90f09e"), Color3.fromHex("#13ed34")),Callback=function()
+		Confirmed = true;
+	end,Variant="Secondary"}}});
+	repeat
+		task.wait();
+	until Confirmed 
+
+local Window = WindUI:CreateWindow({
+    Title = gradient("input ur shi here", Color3.fromHex("#f0e407"), Color3.fromHex("#16a9f2")),
+    Icon = "infinity",
+    CornerRadius = UDim.new(0,16),
+    Author = "wtv u want",
+    Folder = "",
+    Size = UDim2.new(0, 580, 0, 460),
+    Transparent = false,
+    Theme = "Dark",
+    SideBarWidth = 200,
+    Background = "",
+    User = {
+        Enabled = true,
+        Anonymous = true,
+        Callback = function() end,
+    },
+})
+
+-- Tabs
+local Tabs = {
+    FastestAutofarmTab = Window:Tab({ Title = gradient("Autofarm", Color3.fromHex("#F44336"), Color3.fromHex("#FF5722")), Icon = "zap" })
+}
+
+
+local fastestAutofarmEnabled = false
+local fastestAutofarmThread = nil
+local fastestAutofarmSpeed = 25
+local collectedCoins = 0
+local webhookUrl = ""
+local webhookEnabled = false
+local reportingInterval = "Disabled"
+local reportingThread = nil
+local startTime = 0
+
+Tabs.FastestAutofarmTab:Section({ Title = "Fastest Coin Autofarm" })
+
+Tabs.FastestAutofarmTab:Toggle({
+    Title = "Enable Fastest Autofarm",
+    Default = false,
+    Callback = function(state)
+        fastestAutofarmEnabled = state
+        if state then
+            collectedCoins = 0
+            startTime = tick()
+            if fastestAutofarmThread then task.cancel(fastestAutofarmThread) end
+            if reportingThread then task.cancel(reportingThread) end
+
+            reportingThread = task.spawn(function()
+                local HttpService = game:GetService("HttpService")
+                local lastReportTime = tick()
+
+                while fastestAutofarmEnabled do
+                    task.wait(1) 
+                    if reportingInterval ~= "Disabled" then
+                        local intervalMinutes = tonumber(reportingInterval)
+                        if intervalMinutes and (tick() - lastReportTime) >= (intervalMinutes * 60) then
+                            lastReportTime = tick()
+
+                            local elapsedTimeSeconds = tick() - startTime
+                            local elapsedTimeHours = elapsedTimeSeconds / 3600
+                            local coinsPerHour = 0
+                            if elapsedTimeHours > 0 then
+                                coinsPerHour = math.floor(collectedCoins / elapsedTimeHours)
+                            end
+
+                            local summaryContent = string.format("Total coins: %d | Est. CPH: %d", collectedCoins, coinsPerHour)
+                            WindUI:Notify({ Title = "Autofarm Session Report", Content = summaryContent, Duration = 7 })
+
+                            if webhookEnabled and webhookUrl ~= "" and webhookUrl:match("discord.com/api/webhooks") then
+                                pcall(function()
+                                    local data = {
+                                        username = "Testol Hub Autofarm",
+                                        embeds = {{
+                                            title = "Autofarm Session Report",
+                                            description = string.format("**Total Coins Collected:** %d\n**Coins Per Hour (Est.):** %d", collectedCoins, coinsPerHour),
+                                            color = 16762880, -- Gold
+                                            footer = { text = "Testol Hub | MM2" }
+                                        }}
+                                    }
+                                    request({
+                                        Url = webhookUrl,
+                                        Method = "POST",
+                                        Headers = { ["Content-Type"] = "application/json" },
+                                        Body = HttpService:JSONEncode(data)
+                                    })
+                                end)
+                            end
+                        end
+                    end
+                end
+            end)
+
+            fastestAutofarmThread = task.spawn(function()
+                local TweenService = game:GetService("TweenService")
+                local LP = game.Players.LocalPlayer
+                local HttpService = game:GetService("HttpService")
+
+                local function GetMap()
+                    for _, obj in ipairs(workspace:GetChildren()) do
+                        if obj:GetAttribute("MapID") and obj:FindFirstChild("CoinContainer") then
+                            return obj
+                        end
+                    end
+                    return nil
+                end
+
+                local function getNearest(HRP_ref)
+                    if not HRP_ref then return nil end
+                    local map = GetMap()
+                    if not map then return nil end
+
+                    local closest, dist = nil, math.huge
+                    for _, coin in ipairs(map.CoinContainer:GetChildren()) do
+                        local v = coin:FindFirstChild("CoinVisual")
+                        if v and not v:GetAttribute("Collected") then
+                            local d = (HRP_ref.Position - coin.Position).Magnitude
+                            if d < dist then
+                                closest = coin
+                                dist = d
+                            end
+                        end
+                    end
+                    return closest
+                end
+
+                local function tp(HRP_ref, Humanoid_ref, hp)
+                    if not HRP_ref or not Humanoid_ref or not hp then return end
+                    Humanoid_ref:ChangeState(11)
+                    local d = (HRP_ref.Position - hp.Position).Magnitude
+                    local t = TweenService:Create(HRP_ref, TweenInfo.new(d / fastestAutofarmSpeed, Enum.EasingStyle.Linear), {CFrame = hp.CFrame})
+                    t:Play()
+                    t.Completed:Wait()
+                end
+
+                while fastestAutofarmEnabled and task.wait() do
+                    local Char = LP.Character
+                    if not (Char and LP:GetAttribute("Alive")) then 
+                        task.wait(1)
+                        continue 
+                    end
+                    local HRP = Char:FindFirstChild("HumanoidRootPart")
+                    local Humanoid = Char:FindFirstChild("Humanoid")
+                    if not (HRP and Humanoid) then 
+                        task.wait(1)
+                        continue 
+                    end
+
+                    local target = getNearest(HRP)
+                    if target then
+                        tp(HRP, Humanoid, target)
+                        local v = target:FindFirstChild("CoinVisual")
+                        while fastestAutofarmEnabled and v and not v:GetAttribute("Collected") and v.Parent do
+                            if not LP:GetAttribute("Alive") then break end
+                            local n_target = getNearest(HRP)
+                            if n_target and n_target ~= target then break end 
+                            task.wait()
+                        end
+                        
+                        collectedCoins = collectedCoins + 1
+                        WindUI:Notify({ Title = "Coin Collected!", Content = "Total Coins: " .. collectedCoins, Duration = 2 })
+                    end
+                end
+            end)
+            WindUI:Notify({ Title = "Fastest Autofarm", Content = "Autofarm Enabled", Icon = "check-circle", Duration = 3 })
+        else
+            if fastestAutofarmThread then task.cancel(fastestAutofarmThread) end
+            if reportingThread then task.cancel(reportingThread) end
+            fastestAutofarmThread, reportingThread = nil, nil
+
+            WindUI:Notify({ Title = "Fastest Autofarm", Content = "Autofarm Disabled", Icon = "x-circle", Duration = 3 })
+        end
+    end
+})
+
+Tabs.FastestAutofarmTab:Slider({
+    Title = "Autofarm Speed",
+    Value = {
+        Min = 1,
+        Max = 30,
+        Default = 25,
+    },
+    Callback = function(val)
+        fastestAutofarmSpeed = val
+        WindUI:Notify({ Title = "Autofarm Speed", Content = "Speed set to: " .. val, Duration = 2 })
+    end
+})
+
+Tabs.FastestAutofarmTab:Section({ Title = "Session Reporting" })
+
+Tabs.FastestAutofarmTab:Dropdown({
+    Title = "Reporting Interval (Minutes)",
+    Values = {"Disabled", "1", "5", "10", "15", "30", "60"},
+    Default = "Disabled",
+    Callback = function(val)
+        reportingInterval = val
+    end
+})
+
+Tabs.FastestAutofarmTab:Section({ Title = "Discord Webhook" })
+
+Tabs.FastestAutofarmTab:Input({
+    Title = "Webhook URL",
+    PlaceholderText = "Enter your Discord webhook URL here",
+    Callback = function(text)
+        webhookUrl = text
+    end
+})
+
+Tabs.FastestAutofarmTab:Toggle({
+    Title = "Enable Webhook Logging",
+    Default = false,
+    Callback = function(state)
+        webhookEnabled = state
+        if state and (webhookUrl == "" or not webhookUrl:match("discord.com/api/webhooks")) then
+            webhookEnabled = false
+            WindUI:Notify({ Title = "Webhook Warning", Content = "Please enter a valid Discord webhook URL first.", Icon = "alert-triangle", Duration = 5 })
+        end
+    end
+})
+
+Tabs.FastestAutofarmTab:Button({
+    Title = "Test Webhook",
+    Callback = function()
+        if webhookUrl ~= "" and webhookUrl:match("discord.com/api/webhooks") then
+            local HttpService = game:GetService("HttpService")
+            pcall(function()
+                local data = {
+                    username = "Testol Hub Autofarm",
+                    embeds = {{
+                        title = "✅ Webhook Test Successful!",
+                        description = "If you're seeing this, the webhook is working correctly.",
+                        color = 65280, -- Green
+                        footer = { text = "Testol Hub | MM2" }
+                    }}
+                }
+                request({
+                    Url = webhookUrl,
+                    Method = "POST",
+                    Headers = { ["Content-Type"] = "application/json" },
+                    Body = HttpService:JSONEncode(data)
+                })
+                WindUI:Notify({ Title = "Webhook Test", Content = "Test message sent successfully!", Icon = "check-circle", Duration = 5 })
+            end)
+        else
+            WindUI:Notify({ Title = "Webhook Error", Content = "Please enter a valid webhook URL first.", Icon = "x-circle", Duration = 5 })
+        end
+    end
+})
+
+-- Add Anti AFK Tab
+local AntiAFKTab = Window:Tab({ Title = "Anti AFK", Icon = "moon" })
+
+AntiAFKTab:Button({
+    Title = "Enable Anti AFK",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))();
+        WindUI:Notify({ Title = "Anti AFK", Content = "Anti AFK script executed!", Duration = 3 })
+    end
+})
