@@ -1,5 +1,5 @@
 -- MM2 Autofarm
-local ANONYMOUS_MODE = false -- Set to true to hide user display, false to show it
+local ANONYMOUS_MODE = true -- Set to true to hide user display, false to show it
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 function gradient(text, startColor, endColor)
