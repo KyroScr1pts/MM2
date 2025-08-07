@@ -1,6 +1,7 @@
 -- MM2 Autofarm
-local ANONYMOUS_MODE = true -- Set to true to hide user display, false to show it
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+local ANONYMOUS_MODE = true
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/main.lua"))()
+
 function gradient(text, startColor, endColor)
     local result = "";
     local length = #text;
@@ -14,30 +15,7 @@ function gradient(text, startColor, endColor)
     end
     return result;
 end
-local Confirmed = false;
-WindUI:Popup({
-    Title = gradient("MM2 Autofarm", Color3.fromHex("#ff6b6b"), Color3.fromHex("#4ecdc4")),
-    Icon = "shield-check",
-    Content = gradient("Kyro Scripts", Color3.fromHex("#ffd93d"), Color3.fromHex("#6bcf7f")),
-    Buttons = {
-        {
-            Title = gradient("Exit", Color3.fromHex("#ff6b6b"), Color3.fromHex("#ff5252")),
-            Callback = function()
-            end,
-            Variant = "Tertiary"
-        },
-        {
-            Title = gradient("Continue", Color3.fromHex("#4ecdc4"), Color3.fromHex("#44a08d")),
-            Callback = function()
-                Confirmed = true;
-            end,
-            Variant = "Secondary"
-        }
-    }
-});
-repeat
-    task.wait();
-until Confirmed
+
 local Window = WindUI:CreateWindow({
     Title = gradient("MM2 Autofarm", Color3.fromHex("#667eea"), Color3.fromHex("#764ba2")),
     Icon = "gamepad-2",
@@ -50,18 +28,19 @@ local Window = WindUI:CreateWindow({
     SideBarWidth = 220,
     Background = "",
     User = {
-        Enabled = not ANONYMOUS_MODE, -- Respect anonymous mode set by the variable
+        Enabled = not ANONYMOUS_MODE,
         Anonymous = false,
         Callback = function()
             local LP = game.Players.LocalPlayer
             return {
-                DisplayName = LP.DisplayName or LP.Name, -- Fallback
+                DisplayName = LP.DisplayName or LP.Name,
                 Username = "@" .. LP.Name,
                 Avatar = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. LP.UserId .. "&width=420&height=420&format=png"
             }
         end,
     },
 })
+
 -- Tabs
 local Tabs = {
     FastestAutofarmTab = Window:Tab({
@@ -88,32 +67,24 @@ local Tabs = {
         Title = "Aimbot",
         Icon = "arrow-right"
     }),
-    -- Moved Anti AFK Tab Above Role Tabs
     AntiAFKTab = Window:Tab({
         Title = "Anti AFK",
         Icon = "moon"
     }),
     Divider1 = Window:Divider(),
-    -- Role Tabs with Gradient but Lighter Colors
     InnocentTab = Window:Tab({
-        Title = gradient("Innocent", Color3.fromHex("#66ff66"), Color3.fromHex("#99ff99")), -- Lighter green gradient
+        Title = gradient("Innocent", Color3.fromHex("#66ff66"), Color3.fromHex("#99ff99")),
         Icon = "circle"
     }),
     MurderTab = Window:Tab({
-        Title = gradient("Murderer", Color3.fromHex("#ff6666"), Color3.fromHex("#ff9999")), -- Lighter red gradient
+        Title = gradient("Murderer", Color3.fromHex("#ff6666"), Color3.fromHex("#ff9999")),
         Icon = "circle"
     }),
     SheriffTab = Window:Tab({
-        Title = gradient("Sheriff", Color3.fromHex("#6666ff"), Color3.fromHex("#9999ff")), -- Lighter blue gradient
+        Title = gradient("Sheriff", Color3.fromHex("#6666ff"), Color3.fromHex("#9999ff")),
         Icon = "circle"
     }),
     Divider2 = Window:Divider(),
-    -- Anti-Steal Tab (Added here)
-    AntiStealTab = Window:Tab({
-        Title = "Anti-Steal",
-        Icon = "shield"
-    }),
-    -- Renamed Configuration Tab to Settings
     SettingsTab = Window:Tab({
         Title = "Settings",
         Icon = "settings"
@@ -122,131 +93,6 @@ local Tabs = {
 
 -- Set Autofarm tab as selected on load
 Window:SelectTab(Tabs.FastestAutofarmTab)
-
--- Anti-Steal Tab Content (Added here)
-local antiStealActive = false
-
-Tabs.AntiStealTab:Section({
-    Title = "Anti-Steal Protection"
-})
-
-Tabs.AntiStealTab:Paragraph({
-    Title = "What is Anti-Steal?",
-    Desc = "Anti-Steal helps protect your game data and prevent unauthorized scripts from accessing or manipulating your character, inventory, or other sensitive information.",
-    Image = "shield-alert"
-})
-
-Tabs.AntiStealTab:Toggle({
-    Title = "Enable Anti-Steal Protection",
-    Default = false,
-    Callback = function(state)
-        antiStealActive = state
-        if state then
-            WindUI:Notify({
-                Title = "Anti-Steal Enabled",
-                Content = "Protection against data theft is now active",
-                Icon = "shield-check",
-                Duration = 4
-            })
-            
-            -- Anti-Steal implementation would go here
-            -- This is a placeholder for actual anti-steal functionality
-            local function protectData()
-                -- Example protections (these would need to be expanded):
-                -- 1. Hook getconnections to prevent disconnection of important events
-                -- 2. Monitor for suspicious remote calls
-                -- 3. Protect character properties
-                -- 4. Block unauthorized script execution
-                
-                local gc = getconnections or get_signal_cons
-                if gc then
-                    for i, connection in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
-                        if connection.Disable then
-                            connection:Disable()
-                        end
-                    end
-                end
-                
-                -- Additional protection logic would be implemented here
-            end
-            
-            protectData()
-        else
-            WindUI:Notify({
-                Title = "Anti-Steal Disabled",
-                Content = "Data protection has been turned off",
-                Icon = "shield-close",
-                Duration = 4
-            })
-        end
-    end
-})
-
-Tabs.AntiStealTab:Section({
-    Title = "Protection Status"
-})
-
-Tabs.AntiStealTab:Label("Status: " .. (antiStealActive and "Active" or "Inactive"))
-
--- Update status label when toggle changes
-local statusLabel = Tabs.AntiStealTab:Label("")
-
-Tabs.AntiStealTab:Toggle({
-    Title = "Enable Anti-Steal Protection",
-    Default = false,
-    Callback = function(state)
-        antiStealActive = state
-        statusLabel:SetText("Status: " .. (antiStealActive and "Active" or "Inactive"))
-        if state then
-            WindUI:Notify({
-                Title = "Anti-Steal Enabled",
-                Content = "Protection against data theft is now active",
-                Icon = "shield-check",
-                Duration = 4
-            })
-        else
-            WindUI:Notify({
-                Title = "Anti-Steal Disabled",
-                Content = "Data protection has been turned off",
-                Icon = "shield-close",
-                Duration = 4
-            })
-        end
-    end
-})
-
-Tabs.AntiStealTab:Section({
-    Title = "Additional Security"
-})
-
-Tabs.AntiStealTab:Button({
-    Title = "Scan for Threats",
-    Callback = function()
-        if antiStealActive then
-            WindUI:Notify({
-                Title = "Security Scan",
-                Content = "Scanning for potential threats...",
-                Icon = "search",
-                Duration = 3
-            })
-            -- Simulate scanning
-            task.wait(2)
-            WindUI:Notify({
-                Title = "Scan Complete",
-                Content = "No threats detected",
-                Icon = "check-circle",
-                Duration = 4
-            })
-        else
-            WindUI:Notify({
-                Title = "Anti-Steal Inactive",
-                Content = "Please enable Anti-Steal protection first",
-                Icon = "alert-triangle",
-                Duration = 4
-            })
-        end
-    end
-})
 
 -- Keep existing autofarm code exactly as is
 local fastestAutofarmEnabled = false
@@ -292,8 +138,7 @@ Tabs.FastestAutofarmTab:Toggle({
                                         username = "MM2 Autofarm",
                                         embeds = {{
                                             title = "Autofarm Session Report",
-                                            description = string.format("**Total Coins Collected:** %d
-**Coins Per Hour (Est.):** %d", collectedCoins, coinsPerHour),
+                                            description = string.format("**Total Coins Collected:** %d\n**Coins Per Hour (Est.):** %d", collectedCoins, coinsPerHour),
                                             color = 3447003,
                                             footer = { text = "MM2 Autofarm | Kyro Scripts" }
                                         }}
@@ -407,10 +252,7 @@ Tabs.FastestAutofarmTab:Button({
             coinsPerHour = math.floor(collectedCoins / elapsedTimeHours)
         end
         local statsContent = string.format(
-            "Coins Collected: %d
-Runtime: %d minutes
-Coins/Hour: %d
-Status: %s",
+            "Coins Collected: %d\nRuntime: %d minutes\nCoins/Hour: %d\nStatus: %s",
             collectedCoins,
             elapsedTimeMinutes,
             coinsPerHour,
@@ -501,8 +343,7 @@ Tabs.FastestAutofarmTab:Button({
                     username = "MM2 Autofarm",
                     embeds = {{
                         title = "Connection Test Successful!",
-                        description = "If you're seeing this message, your Discord webhook is working correctly.
-MM2 Autofarm is now connected to your Discord server.",
+                        description = "If you're seeing this message, your Discord webhook is working correctly.\nMM2 Autofarm is now connected to your Discord server.",
                         color = 3066993,
                         footer = { text = "MM2 Autofarm | Kyro Scripts" },
                         timestamp = os.date("!%Y-%m-%dT%H:%M:%S.000Z")
@@ -531,6 +372,7 @@ MM2 Autofarm is now connected to your Discord server.",
         end
     end
 })
+
 -- Weapon Spawner Tab
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
@@ -538,17 +380,18 @@ local LocalPlayer = Players.LocalPlayer
 local boxmodule = nil
 local itemdatabase = nil
 local poop = nil
--- Try to load modules safely
+
 pcall(function()
     boxmodule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("BoxModule"))
 end)
 pcall(function()
     itemdatabase = require(ReplicatedStorage:WaitForChild("Database"):WaitForChild("Sync"):WaitForChild("Item"))
 end)
--- Try to get the NewItem environment safely
+
 pcall(function()
     poop = getsenv(LocalPlayer.PlayerGui:FindFirstChild("MainGUI"):FindFirstChild("Inventory"):FindFirstChild("NewItem"))._G
 end)
+
 local function getrandombox()
     local boxes = nil
     pcall(function()
@@ -561,6 +404,7 @@ local function getrandombox()
     end
     return keys[math.random(1, #keys)]
 end
+
 local function opencrate(ITEM_NAME)
     if not boxmodule or not itemdatabase then
         WindUI:Notify({
@@ -601,7 +445,7 @@ local function opencrate(ITEM_NAME)
         })
     end
 end
--- Weapon Spawner Tab Content
+
 local itemList = {
     "Harvester",
     "Gingerscope",
@@ -612,7 +456,7 @@ local itemList = {
     "WraithKnife",
     "WatergunChroma"
 }
-local selectedItemFromDropdown = itemList[1] -- Default to first item
+local selectedItemFromDropdown = itemList[1]
 Tabs.WeaponSpawnerTab:Dropdown({
     Title = "Select Godly Item",
     Values = itemList,
@@ -652,6 +496,7 @@ Tabs.WeaponSpawnerTab:Button({
         end
     end
 })
+
 -- Trade Scam Tab
 local victimName = "";
 Tabs.TradeScamTab:Section({
@@ -709,13 +554,15 @@ Tabs.TradeScamTab:Button({
             });
         end
     end
-})
+});
+
 -- Teleport Tab
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local CurrentCamera = Workspace.CurrentCamera
 local teleportTarget = nil
 local teleportDropdown = nil
+
 local function updateTeleportPlayers()
     local playersList = {
         "Select Player"
@@ -727,6 +574,7 @@ local function updateTeleportPlayers()
     end
     return playersList;
 end
+
 local function initializeTeleportDropdown()
     teleportDropdown = Tabs.TeleportTab:Dropdown({
         Title = "Players",
@@ -741,18 +589,22 @@ local function initializeTeleportDropdown()
         end
     });
 end
+
 initializeTeleportDropdown();
+
 Players.PlayerAdded:Connect(function(player)
     task.wait(1);
     if teleportDropdown then
         teleportDropdown:Refresh(updateTeleportPlayers());
     end
 end);
+
 Players.PlayerRemoving:Connect(function(player)
     if teleportDropdown then
         teleportDropdown:Refresh(updateTeleportPlayers());
     end
 end);
+
 local function teleportToPlayer()
     if (teleportTarget and teleportTarget.Character) then
         local targetRoot = teleportTarget.Character:FindFirstChild("HumanoidRootPart");
@@ -775,19 +627,23 @@ local function teleportToPlayer()
         });
     end
 end
+
 Tabs.TeleportTab:Button({
     Title = "Teleport to player",
     Callback = teleportToPlayer
 });
+
 Tabs.TeleportTab:Button({
     Title = "Update players list",
     Callback = function()
         teleportDropdown:Refresh(updateTeleportPlayers());
     end
 });
+
 Tabs.TeleportTab:Section({
     Title = "Special TP"
 });
+
 local function teleportToLobby()
     local lobby = workspace:FindFirstChild("Lobby");
     if not lobby then
@@ -813,10 +669,12 @@ local function teleportToLobby()
         });
     end
 end
+
 Tabs.TeleportTab:Button({
     Title = "Teleport to Lobby",
     Callback = teleportToLobby
 });
+
 -- ESP Tab
 local ESPConfig = {
     HighlightMurderer = false,
@@ -825,6 +683,7 @@ local ESPConfig = {
 };
 local Murder, Sheriff, Hero;
 local roles = {};
+
 function CreateHighlight(player)
     if ((player ~= LocalPlayer) and player.Character and not player.Character:FindFirstChild("Highlight")) then
         local highlight = Instance.new("Highlight");
@@ -835,6 +694,7 @@ function CreateHighlight(player)
     end
     return player.Character and player.Character:FindFirstChild("Highlight");
 end
+
 function RemoveAllHighlights()
     for _, player in pairs(Players:GetPlayers()) do
         if (player.Character and player.Character:FindFirstChild("Highlight")) then
@@ -842,6 +702,7 @@ function RemoveAllHighlights()
         end
     end
 end
+
 function UpdateHighlights()
     for _, player in pairs(Players:GetPlayers()) do
         if ((player ~= LocalPlayer) and player.Character) then
@@ -880,6 +741,7 @@ function UpdateHighlights()
         end
     end
 end
+
 function IsAlive(player)
     for name, data in pairs(roles) do
         if (player.Name == name) then
@@ -888,6 +750,7 @@ function IsAlive(player)
     end
     return false;
 end
+
 local function UpdateRoles()
     local success, result = pcall(function()
         return ReplicatedStorage:FindFirstChild("GetPlayerData", true):InvokeServer();
@@ -905,9 +768,11 @@ local function UpdateRoles()
         end
     end
 end
+
 Tabs.EspTab:Section({
     Title = "Special ESP"
 });
+
 Tabs.EspTab:Toggle({
     Title = "Highlight Murderer",
     Default = false,
@@ -918,6 +783,7 @@ Tabs.EspTab:Toggle({
         end
     end
 });
+
 Tabs.EspTab:Toggle({
     Title = "Highlight Innocent",
     Default = false,
@@ -928,6 +794,7 @@ Tabs.EspTab:Toggle({
         end
     end
 });
+
 Tabs.EspTab:Toggle({
     Title = "Highlight Sheriff",
     Default = false,
@@ -938,6 +805,7 @@ Tabs.EspTab:Toggle({
         end
     end
 });
+
 local gunDropESPEnabled = false;
 local gunDropHighlight = nil;
 local mapPaths = {
@@ -953,6 +821,7 @@ local mapPaths = {
     "Bank2",
     "PoliceStation"
 };
+
 local function createGunDropHighlight(gunDrop)
     if (gunDropESPEnabled and gunDrop and not gunDrop:FindFirstChild("GunDropHighlight")) then
         local highlight = Instance.new("Highlight");
@@ -963,6 +832,7 @@ local function createGunDropHighlight(gunDrop)
         highlight.Parent = gunDrop;
     end
 end
+
 local function updateGunDropESP()
     for _, mapName in pairs(mapPaths) do
         local map = workspace:FindFirstChild(mapName);
@@ -985,6 +855,7 @@ local function updateGunDropESP()
         end
     end
 end
+
 local function monitorGunDrops()
     for _, mapName in pairs(mapPaths) do
         local map = workspace:FindFirstChild(mapName);
@@ -997,7 +868,9 @@ local function monitorGunDrops()
         end
     end
 end
+
 monitorGunDrops();
+
 Tabs.EspTab:Toggle({
     Title = "GunDrop Highlight",
     Default = false,
@@ -1006,23 +879,27 @@ Tabs.EspTab:Toggle({
         updateGunDropESP();
     end
 });
+
 workspace.ChildAdded:Connect(function(child)
     if table.find(mapPaths, child.Name) then
         task.wait(2);
         updateGunDropESP();
     end
 end);
+
 RunService.RenderStepped:Connect(function()
     UpdateRoles();
     if (ESPConfig.HighlightMurderer or ESPConfig.HighlightInnocent or ESPConfig.HighlightSheriff) then
         UpdateHighlights();
     end
 end);
+
 Players.PlayerRemoving:Connect(function(player)
     if (player == LocalPlayer) then
         RemoveAllHighlights();
     end
 end);
+
 -- Aimbot Tab
 local isCameraLocked = false;
 local isSpectating = false;
@@ -1030,9 +907,11 @@ local lockedRole = nil;
 local cameraConnection = nil;
 local originalCameraType = Enum.CameraType.Custom;
 local originalCameraSubject = nil;
+
 Tabs.AimbotTab:Section({
     Title = "Default AimBot"
 });
+
 RoleDropdown = Tabs.AimbotTab:Dropdown({
     Title = "Target Role",
     Values = {
@@ -1045,6 +924,7 @@ RoleDropdown = Tabs.AimbotTab:Dropdown({
         lockedRole = ((selected ~= "None") and selected) or nil;
     end
 });
+
 Tabs.AimbotTab:Toggle({
     Title = "Spectate Mode",
     Default = false,
@@ -1060,6 +940,7 @@ Tabs.AimbotTab:Toggle({
         end
     end
 });
+
 Tabs.AimbotTab:Toggle({
     Title = "Lock Camera",
     Default = false,
@@ -1071,6 +952,7 @@ Tabs.AimbotTab:Toggle({
         end
     end
 });
+
 local function GetTargetPosition()
     if not lockedRole then
         return nil;
@@ -1090,6 +972,7 @@ local function GetTargetPosition()
     local head = character:FindFirstChild("Head");
     return (head and head.Position) or nil;
 end
+
 local function UpdateSpectate()
     if (not isSpectating or not lockedRole) then
         return;
@@ -1107,6 +990,7 @@ local function UpdateSpectate()
         end
     end
 end
+
 local function UpdateLockCamera()
     if (not isCameraLocked or not lockedRole) then
         return;
@@ -1118,6 +1002,7 @@ local function UpdateLockCamera()
     local currentPos = CurrentCamera.CFrame.Position;
     CurrentCamera.CFrame = CFrame.new(currentPos, targetPos);
 end
+
 local function Update()
     if isSpectating then
         UpdateSpectate();
@@ -1125,14 +1010,17 @@ local function Update()
         UpdateLockCamera();
     end
 end
+
 local function AutoUpdate()
     while true do
         UpdateRoles();
         task.wait(3);
     end
 end
+
 coroutine.wrap(AutoUpdate)();
 cameraConnection = RunService.RenderStepped:Connect(Update);
+
 LocalPlayer.AncestryChanged:Connect(function()
     if (not LocalPlayer.Parent and cameraConnection) then
         cameraConnection:Disconnect();
@@ -1140,7 +1028,9 @@ LocalPlayer.AncestryChanged:Connect(function()
         CurrentCamera.CameraSubject = originalCameraSubject;
     end
 end);
+
 UpdateRoles();
+
 -- Innocent Tab
 local GunSystem = {
     AutoGrabEnabled = false,
@@ -1149,6 +1039,7 @@ local GunSystem = {
     ActiveGunDrops = {},
     GunDropHighlights = {}
 };
+
 local function ScanForGunDrops()
     GunSystem.ActiveGunDrops = {};
     for _, mapName in ipairs(mapPaths) do
@@ -1165,6 +1056,7 @@ local function ScanForGunDrops()
         table.insert(GunSystem.ActiveGunDrops, rootGunDrop);
     end
 end
+
 local function EquipGun()
     if (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Gun")) then
         return true;
@@ -1177,6 +1069,7 @@ local function EquipGun()
     end
     return false;
 end
+
 local function GrabGun(gunDrop)
     if not gunDrop then
         ScanForGunDrops();
@@ -1224,6 +1117,7 @@ local function GrabGun(gunDrop)
     end
     return false;
 end
+
 local function AutoGrabGun()
     while GunSystem.AutoGrabEnabled do
         ScanForGunDrops();
@@ -1253,6 +1147,7 @@ local function AutoGrabGun()
         task.wait(GunSystem.GunDropCheckInterval);
     end
 end
+
 Tabs.InnocentTab:Toggle({
     Title = "Notify GunDrop",
     Default = true,
@@ -1266,12 +1161,14 @@ Tabs.InnocentTab:Toggle({
         end
     end
 });
+
 Tabs.InnocentTab:Button({
     Title = "Grab Gun",
     Callback = function()
         GrabGun();
     end
 });
+
 Tabs.InnocentTab:Toggle({
     Title = "Auto Grab Gun",
     Default = false,
@@ -1295,6 +1192,7 @@ Tabs.InnocentTab:Toggle({
         end
     end
 });
+
 -- Murder Tab
 local killActive = false;
 local attackDelay = 0.5;
@@ -1303,6 +1201,7 @@ local targetRoles = {
     "Hero",
     "Innocent"
 };
+
 local function getPlayerRole(player)
     local roles = ReplicatedStorage:FindFirstChild("GetPlayerData", true):InvokeServer();
     if (roles and roles[player.Name]) then
@@ -1310,6 +1209,7 @@ local function getPlayerRole(player)
     end
     return nil;
 end
+
 local function equipKnife()
     local character = LocalPlayer.Character;
     if not character then
@@ -1325,6 +1225,7 @@ local function equipKnife()
     end
     return false;
 end
+
 local function getNearestTarget()
     local targets = {};
     local roles = ReplicatedStorage:FindFirstChild("GetPlayerData", true):InvokeServer();
@@ -1350,6 +1251,7 @@ local function getNearestTarget()
     end);
     return (targets[1] and targets[1].Player) or nil;
 end
+
 local function attackTarget(target)
     if (not target or not target.Character) then
         return false;
@@ -1381,6 +1283,7 @@ local function attackTarget(target)
     end
     return false;
 end
+
 local function killTargets()
     if killActive then
         return;
@@ -1418,6 +1321,7 @@ local function killTargets()
     end
     task.spawn(attackSequence);
 end
+
 local function stopKilling()
     killActive = false;
     WindUI:Notify({
@@ -1427,9 +1331,11 @@ local function stopKilling()
         Duration = 2
     });
 end
+
 Tabs.MurderTab:Section({
     Title = "Kill Functions"
 });
+
 Tabs.MurderTab:Toggle({
     Title = "Kill All",
     Default = false,
@@ -1441,6 +1347,7 @@ Tabs.MurderTab:Toggle({
         end
     end
 });
+
 Tabs.MurderTab:Slider({
     Title = "Attack Delay",
     Step = 0.1,
@@ -1459,6 +1366,7 @@ Tabs.MurderTab:Slider({
         });
     end
 });
+
 Tabs.MurderTab:Button({
     Title = "Equip Knife",
     Callback = function()
@@ -1479,6 +1387,7 @@ Tabs.MurderTab:Button({
         end
     end
 });
+
 -- Sheriff Tab
 local shotButton = nil;
 local shotButtonFrame = nil;
@@ -1486,6 +1395,7 @@ local shotButtonActive = false;
 local shotType = "Default";
 local buttonSize = 50;
 local isDragging = false;
+
 local function CreateShotButton()
     if shotButton then
         return;
@@ -1643,6 +1553,7 @@ local function CreateShotButton()
         Duration = 3
     });
 end
+
 local function RemoveShotButton()
     if not shotButton then
         return;
@@ -1667,6 +1578,7 @@ local function RemoveShotButton()
         Duration = 3
     });
 end
+
 local function ShootMurderer()
     if (not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("Humanoid") or (LocalPlayer.Character.Humanoid.Health <= 0)) then
         return;
@@ -1717,9 +1629,11 @@ local function ShootMurderer()
         end
     end
 end
+
 Tabs.SheriffTab:Section({
     Title = "Shot Functions"
 });
+
 Tabs.SheriffTab:Dropdown({
     Title = "Shot Type",
     Values = {
@@ -1737,15 +1651,18 @@ Tabs.SheriffTab:Dropdown({
         });
     end
 });
+
 Tabs.SheriffTab:Button({
     Title = "Shoot Murderer",
     Callback = function()
         ShootMurderer();
     end
 });
+
 Tabs.SheriffTab:Section({
     Title = "Shot Button"
 });
+
 Tabs.SheriffTab:Button({
     Title = "Toggle Shot Button",
     Callback = function()
@@ -1756,6 +1673,7 @@ Tabs.SheriffTab:Button({
         end
     end
 });
+
 Tabs.SheriffTab:Slider({
     Title = "Button Size",
     Step = 1,
@@ -1782,15 +1700,17 @@ Tabs.SheriffTab:Slider({
         });
     end
 });
--- Settings Tab (Previously Configuration)
--- Removed User Display section and Anonymous Mode toggle
+
+-- Settings Tab
 Tabs.SettingsTab:Section({
     Title = "Themes"
 });
+
 local themeValues = {};
 for name, _ in pairs(WindUI:GetThemes()) do
     table.insert(themeValues, name);
 end
+
 local themeDropdown = Tabs.SettingsTab:Dropdown({
     Title = "Select Theme",
     Multi = false,
@@ -1801,7 +1721,9 @@ local themeDropdown = Tabs.SettingsTab:Dropdown({
         WindUI:SetTheme(theme);
     end
 });
+
 themeDropdown:Select(WindUI:GetCurrentTheme());
+
 local ToggleTransparency = Tabs.SettingsTab:Toggle({
     Title = "Toggle Window Transparency",
     Callback = function(e)
@@ -1809,7 +1731,8 @@ local ToggleTransparency = Tabs.SettingsTab:Toggle({
     end,
     Value = WindUI:GetTransparency()
 });
--- Anti AFK Tab Content (Moved and placed here)
+
+-- Anti AFK Tab Content
 Tabs.AntiAFKTab:Button({
     Title = "Enable Anti AFK",
     Callback = function()
@@ -1817,4 +1740,3 @@ Tabs.AntiAFKTab:Button({
         WindUI:Notify({ Title = "Anti AFK", Content = "Anti AFK enabled", Duration = 3, Icon = "shield" })
     end
 })
--- Removed the Information section and "About MM2 Autofarm" button from Anti AFK Tab
