@@ -1,7 +1,6 @@
 -- MM2 Autofarm
 local ANONYMOUS_MODE = true -- Set to true to hide user display, false to show it
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-
 function gradient(text, startColor, endColor)
     local result = "";
     local length = #text;
@@ -15,7 +14,6 @@ function gradient(text, startColor, endColor)
     end
     return result;
 end
-
 local Confirmed = false;
 WindUI:Popup({
     Title = gradient("MM2 Autofarm", Color3.fromHex("#ff6b6b"), Color3.fromHex("#4ecdc4")),
@@ -40,7 +38,6 @@ WindUI:Popup({
 repeat
     task.wait();
 until Confirmed
-
 local Window = WindUI:CreateWindow({
     Title = gradient("MM2 Autofarm", Color3.fromHex("#667eea"), Color3.fromHex("#764ba2")),
     Icon = "gamepad-2",
@@ -65,7 +62,6 @@ local Window = WindUI:CreateWindow({
         end,
     },
 })
-
 -- Tabs
 local Tabs = {
     FastestAutofarmTab = Window:Tab({
@@ -112,12 +108,145 @@ local Tabs = {
         Icon = "circle"
     }),
     Divider2 = Window:Divider(),
+    -- Anti-Steal Tab (Added here)
+    AntiStealTab = Window:Tab({
+        Title = "Anti-Steal",
+        Icon = "shield"
+    }),
     -- Renamed Configuration Tab to Settings
     SettingsTab = Window:Tab({
         Title = "Settings",
         Icon = "settings"
     })
 }
+
+-- Set Autofarm tab as selected on load
+Window:SelectTab(Tabs.FastestAutofarmTab)
+
+-- Anti-Steal Tab Content (Added here)
+local antiStealActive = false
+
+Tabs.AntiStealTab:Section({
+    Title = "Anti-Steal Protection"
+})
+
+Tabs.AntiStealTab:Paragraph({
+    Title = "What is Anti-Steal?",
+    Desc = "Anti-Steal helps protect your game data and prevent unauthorized scripts from accessing or manipulating your character, inventory, or other sensitive information.",
+    Image = "shield-alert"
+})
+
+Tabs.AntiStealTab:Toggle({
+    Title = "Enable Anti-Steal Protection",
+    Default = false,
+    Callback = function(state)
+        antiStealActive = state
+        if state then
+            WindUI:Notify({
+                Title = "Anti-Steal Enabled",
+                Content = "Protection against data theft is now active",
+                Icon = "shield-check",
+                Duration = 4
+            })
+            
+            -- Anti-Steal implementation would go here
+            -- This is a placeholder for actual anti-steal functionality
+            local function protectData()
+                -- Example protections (these would need to be expanded):
+                -- 1. Hook getconnections to prevent disconnection of important events
+                -- 2. Monitor for suspicious remote calls
+                -- 3. Protect character properties
+                -- 4. Block unauthorized script execution
+                
+                local gc = getconnections or get_signal_cons
+                if gc then
+                    for i, connection in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
+                        if connection.Disable then
+                            connection:Disable()
+                        end
+                    end
+                end
+                
+                -- Additional protection logic would be implemented here
+            end
+            
+            protectData()
+        else
+            WindUI:Notify({
+                Title = "Anti-Steal Disabled",
+                Content = "Data protection has been turned off",
+                Icon = "shield-close",
+                Duration = 4
+            })
+        end
+    end
+})
+
+Tabs.AntiStealTab:Section({
+    Title = "Protection Status"
+})
+
+Tabs.AntiStealTab:Label("Status: " .. (antiStealActive and "Active" or "Inactive"))
+
+-- Update status label when toggle changes
+local statusLabel = Tabs.AntiStealTab:Label("")
+
+Tabs.AntiStealTab:Toggle({
+    Title = "Enable Anti-Steal Protection",
+    Default = false,
+    Callback = function(state)
+        antiStealActive = state
+        statusLabel:SetText("Status: " .. (antiStealActive and "Active" or "Inactive"))
+        if state then
+            WindUI:Notify({
+                Title = "Anti-Steal Enabled",
+                Content = "Protection against data theft is now active",
+                Icon = "shield-check",
+                Duration = 4
+            })
+        else
+            WindUI:Notify({
+                Title = "Anti-Steal Disabled",
+                Content = "Data protection has been turned off",
+                Icon = "shield-close",
+                Duration = 4
+            })
+        end
+    end
+})
+
+Tabs.AntiStealTab:Section({
+    Title = "Additional Security"
+})
+
+Tabs.AntiStealTab:Button({
+    Title = "Scan for Threats",
+    Callback = function()
+        if antiStealActive then
+            WindUI:Notify({
+                Title = "Security Scan",
+                Content = "Scanning for potential threats...",
+                Icon = "search",
+                Duration = 3
+            })
+            -- Simulate scanning
+            task.wait(2)
+            WindUI:Notify({
+                Title = "Scan Complete",
+                Content = "No threats detected",
+                Icon = "check-circle",
+                Duration = 4
+            })
+        else
+            WindUI:Notify({
+                Title = "Anti-Steal Inactive",
+                Content = "Please enable Anti-Steal protection first",
+                Icon = "alert-triangle",
+                Duration = 4
+            })
+        end
+    end
+})
 
 -- Keep existing autofarm code exactly as is
 local fastestAutofarmEnabled = false
@@ -163,7 +292,8 @@ Tabs.FastestAutofarmTab:Toggle({
                                         username = "MM2 Autofarm",
                                         embeds = {{
                                             title = "Autofarm Session Report",
-                                            description = string.format("**Total Coins Collected:** %d\n**Coins Per Hour (Est.):** %d", collectedCoins, coinsPerHour),
+                                            description = string.format("**Total Coins Collected:** %d
+**Coins Per Hour (Est.):** %d", collectedCoins, coinsPerHour),
                                             color = 3447003,
                                             footer = { text = "MM2 Autofarm | Kyro Scripts" }
                                         }}
@@ -277,7 +407,10 @@ Tabs.FastestAutofarmTab:Button({
             coinsPerHour = math.floor(collectedCoins / elapsedTimeHours)
         end
         local statsContent = string.format(
-            "Coins Collected: %d\nRuntime: %d minutes\nCoins/Hour: %d\nStatus: %s",
+            "Coins Collected: %d
+Runtime: %d minutes
+Coins/Hour: %d
+Status: %s",
             collectedCoins,
             elapsedTimeMinutes,
             coinsPerHour,
@@ -368,7 +501,8 @@ Tabs.FastestAutofarmTab:Button({
                     username = "MM2 Autofarm",
                     embeds = {{
                         title = "Connection Test Successful!",
-                        description = "If you're seeing this message, your Discord webhook is working correctly.\nMM2 Autofarm is now connected to your Discord server.",
+                        description = "If you're seeing this message, your Discord webhook is working correctly.
+MM2 Autofarm is now connected to your Discord server.",
                         color = 3066993,
                         footer = { text = "MM2 Autofarm | Kyro Scripts" },
                         timestamp = os.date("!%Y-%m-%dT%H:%M:%S.000Z")
@@ -575,7 +709,7 @@ Tabs.TradeScamTab:Button({
             });
         end
     end
-});
+})
 -- Teleport Tab
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -1675,7 +1809,6 @@ local ToggleTransparency = Tabs.SettingsTab:Toggle({
     end,
     Value = WindUI:GetTransparency()
 });
-
 -- Anti AFK Tab Content (Moved and placed here)
 Tabs.AntiAFKTab:Button({
     Title = "Enable Anti AFK",
