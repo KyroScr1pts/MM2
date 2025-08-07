@@ -93,9 +93,9 @@ local Tabs = {
         Title = "Anti AFK",
         Icon = "moon"
     }),
-    -- Added Anti-Steal Tab
+    -- Added Anti Steal Tab
     AntiStealTab = Window:Tab({
-        Title = "Anti-Steal",
+        Title = "Anti Steal",
         Icon = "shield"
     }),
     Divider1 = Window:Divider(),
@@ -120,7 +120,7 @@ local Tabs = {
     })
 }
 
--- Select the Autofarm tab by default after the popup is confirmed
+-- Select Autofarm tab by default after loading
 Window:SelectTab(Tabs.FastestAutofarmTab)
 
 -- Keep existing autofarm code exactly as is
@@ -167,7 +167,8 @@ Tabs.FastestAutofarmTab:Toggle({
                                         username = "MM2 Autofarm",
                                         embeds = {{
                                             title = "Autofarm Session Report",
-                                            description = string.format("**Total Coins Collected:** %d\n**Coins Per Hour (Est.):** %d", collectedCoins, coinsPerHour),
+                                            description = string.format("**Total Coins Collected:** %d
+**Coins Per Hour (Est.):** %d", collectedCoins, coinsPerHour),
                                             color = 3447003,
                                             footer = { text = "MM2 Autofarm | Kyro Scripts" }
                                         }}
@@ -281,7 +282,10 @@ Tabs.FastestAutofarmTab:Button({
             coinsPerHour = math.floor(collectedCoins / elapsedTimeHours)
         end
         local statsContent = string.format(
-            "Coins Collected: %d\nRuntime: %d minutes\nCoins/Hour: %d\nStatus: %s",
+            "Coins Collected: %d
+Runtime: %d minutes
+Coins/Hour: %d
+Status: %s",
             collectedCoins,
             elapsedTimeMinutes,
             coinsPerHour,
@@ -372,7 +376,8 @@ Tabs.FastestAutofarmTab:Button({
                     username = "MM2 Autofarm",
                     embeds = {{
                         title = "Connection Test Successful!",
-                        description = "If you're seeing this message, your Discord webhook is working correctly.\nMM2 Autofarm is now connected to your Discord server.",
+                        description = "If you're seeing this message, your Discord webhook is working correctly.
+MM2 Autofarm is now connected to your Discord server.",
                         color = 3066993,
                         footer = { text = "MM2 Autofarm | Kyro Scripts" },
                         timestamp = os.date("!%Y-%m-%dT%H:%M:%S.000Z")
@@ -579,7 +584,7 @@ Tabs.TradeScamTab:Button({
             });
         end
     end
-});
+})
 -- Teleport Tab
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -1652,7 +1657,44 @@ Tabs.SheriffTab:Slider({
         });
     end
 });
--- Anti-Steal Tab Content
+-- Settings Tab (Previously Configuration)
+-- Removed User Display section and Anonymous Mode toggle
+Tabs.SettingsTab:Section({
+    Title = "Themes"
+});
+local themeValues = {};
+for name, _ in pairs(WindUI:GetThemes()) do
+    table.insert(themeValues, name);
+end
+local themeDropdown = Tabs.SettingsTab:Dropdown({
+    Title = "Select Theme",
+    Multi = false,
+    AllowNone = false,
+    Value = nil,
+    Values = themeValues,
+    Callback = function(theme)
+        WindUI:SetTheme(theme);
+    end
+});
+themeDropdown:Select(WindUI:GetCurrentTheme());
+local ToggleTransparency = Tabs.SettingsTab:Toggle({
+    Title = "Toggle Window Transparency",
+    Callback = function(e)
+        Window:ToggleTransparency(e);
+    end,
+    Value = WindUI:GetTransparency()
+});
+-- Anti AFK Tab Content (Moved and placed here)
+Tabs.AntiAFKTab:Button({
+    Title = "Enable Anti AFK",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))();
+        WindUI:Notify({ Title = "Anti AFK", Content = "Anti AFK enabled", Duration = 3, Icon = "shield" })
+    end
+})
+-- Removed the Information section and "About MM2 Autofarm" button from Anti AFK Tab
+
+-- Anti Steal Tab Content
 Tabs.AntiStealTab:Section({
     Title = "Anti-Steal Protection"
 })
@@ -1714,9 +1756,11 @@ Tabs.AntiStealTab:Section({
     Title = "Protection Status"
 })
 
-local statusLabel = Tabs.AntiStealTab:Label("Status: " .. (antiStealActive and "Active" or "Inactive"))
+Tabs.AntiStealTab:Label("Status: " .. (antiStealActive and "Active" or "Inactive"))
 
 -- Update status label when toggle changes
+local statusLabel = Tabs.AntiStealTab:Label("")
+
 Tabs.AntiStealTab:Toggle({
     Title = "Enable Anti-Steal Protection",
     Default = false,
@@ -1773,40 +1817,3 @@ Tabs.AntiStealTab:Button({
         end
     end
 })
-
--- Settings Tab (Previously Configuration)
--- Removed User Display section and Anonymous Mode toggle
-Tabs.SettingsTab:Section({
-    Title = "Themes"
-});
-local themeValues = {};
-for name, _ in pairs(WindUI:GetThemes()) do
-    table.insert(themeValues, name);
-end
-local themeDropdown = Tabs.SettingsTab:Dropdown({
-    Title = "Select Theme",
-    Multi = false,
-    AllowNone = false,
-    Value = nil,
-    Values = themeValues,
-    Callback = function(theme)
-        WindUI:SetTheme(theme);
-    end
-});
-themeDropdown:Select(WindUI:GetCurrentTheme());
-local ToggleTransparency = Tabs.SettingsTab:Toggle({
-    Title = "Toggle Window Transparency",
-    Callback = function(e)
-        Window:ToggleTransparency(e);
-    end,
-    Value = WindUI:GetTransparency()
-});
--- Anti AFK Tab Content (Moved and placed here)
-Tabs.AntiAFKTab:Button({
-    Title = "Enable Anti AFK",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))();
-        WindUI:Notify({ Title = "Anti AFK", Content = "Anti AFK enabled", Duration = 3, Icon = "shield" })
-    end
-})
--- Removed the Information section and "About MM2 Autofarm" button from Anti AFK Tab
